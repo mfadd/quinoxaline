@@ -63,6 +63,8 @@ for train, test in kfold.split(x, y):
 gbr = XGBRegressor()
 gbr.fit(x_train, y_train)
 
+
+
 # ========================================================================================================================================================================================
 
 # STREAMLIT
@@ -70,97 +72,118 @@ st.set_page_config(
   page_title = "Quinoxaline Regression"
 )
 
-st.title("Quinoxaline Regression")
 
-st.sidebar.header("**User Input** Sidebar")
-ConM = st.sidebar.number_input(label="Con (M)", step=0.001, format="%0.3f")
-st.sidebar.write("")
+# Inisialisasi halaman default di session state
+if "halaman" not in st.session_state:
+    st.session_state.halaman = "Halaman Utama"
 
-TempKelvin = st.sidebar.number_input(label="Temp (K)")
-st.sidebar.write("")
+# Membuat tombol di sidebar dan mengubah halaman saat tombol diklik
+with st.sidebar:
+    st.title("Navigasi")
+    if st.button("Halaman Utama"):
+        st.session_state.halaman = "Halaman Utama"
+    if st.button("Prediksi Antrikorosi"):
+        st.session_state.halaman = "prediksi"
+    
 
-TEeV = st.sidebar.number_input(label="TE (eV)", step=0.01, format="%0.2f")
-st.sidebar.write("")
+# Menampilkan konten sesuai dengan halaman yang aktif
+if st.session_state.halaman == "Halaman Utama":
+    st.title("Selamat Datang di Aplikasi Prediksi Efektivitas Inhibitor Korosi Berbasis Machine Learning Senyawa Quinoxaline")
+    st.write("Aplikasi ini dirancang untuk memprediksi efektivitas senyawa inhibitor korosi menggunakan model machine learning. Mengimplementasikan model XGBoost Regressor, aplikasi ini memungkinkan pengguna untuk melakukan regresi terhadap efektivitas inhibitor berbasis quinoxaline. Dengan mampu menghasilkan nilai R2 tertinggi sebesar 0.958 dan RMSE, MSE, MAD, MAPE paling rendah dengan nilai berturut-turut 0.434, 0.189, 0.122, 0.343. Dengan nilai tersebut XGBR mampu memperlihatkan kemampuan prediksi yang baik. Tujuannya adalah memberikan prediksi tingkat proteksi yang diberikan oleh senyawa inhibitor terhadap korosi dalam berbagai kondisi.")
+    
+    st.image("plotxgbr.png", caption="Plot Visualisasi", use_column_width=True)
+    st.write("Dapat dilihat pada Gambar diatas sebaran data poin untuk hasil prediksi sangat mendekati garis prediksi. Semakin dekat dengan garis prediksi maka model tersebut bisa menghasilkan prediksi yang baik. Hal ini menunjukkan pada kasus ini model XGBR memiliki kemampuan prediksi yang lebih unggul dengan mampu menghasilkan nilai prediksi yang mendekati nilai aktualnya.")
+    st.write("Untuk menggunakan aplikasi prediksi antikorosi bisa diakses melalui menu di samping.")
+elif st.session_state.halaman == "prediksi":
+    st.title("Prediksi Efisiensi Senyawa Antikorosi Quinoxaline")
+    # Membuat form
+    with st.form("my_form"):
+        st.write("Input")
 
-EHOMOeV = st.sidebar.number_input(label="EHOMO (eV)", step=0.001, format="%0.3f")
-st.sidebar.write("")
+        # Membuat dua kolom
+        col1, col2 = st.columns(2)
 
-ELUMOeV = st.sidebar.number_input(label="ELUMO (eV)", step=0.001, format="%0.3f")
-st.sidebar.write("")
+        # Field input di kolom pertama
+        with col1:
+            ConM = st.number_input(label="Con (M)", step=0.001, format="%0.3f")
+            
 
-deltaΕeV = st.sidebar.number_input(label="ΔΕ (eV)", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            TempKelvin = st.number_input(label="Temp (K)")
+           
 
-µ = st.sidebar.number_input(label="µ", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            TEeV = st.number_input(label="TE (eV)", step=0.01, format="%0.2f")
+            
 
-iP = st.sidebar.number_input(label="IP", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            EHOMOeV = st.number_input(label="EHOMO (eV)", step=0.001, format="%0.3f")
+            
 
-eA = st.sidebar.number_input(label="EA", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            ELUMOeV = st.number_input(label="ELUMO (eV)", step=0.001, format="%0.3f")
+            
+            deltaΕeV = st.number_input(label="ΔΕ (eV)", step=0.001, format="%0.3f")
+            
 
-X = st.sidebar.number_input(label="X", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            µ = st.number_input(label="µ", step=0.001, format="%0.3f")
+                        
 
-η = st.sidebar.number_input(label="η", step=0.001, format="%0.3f")
-st.sidebar.write("")
+        # Field input di kolom kedua
+        with col2:
+            
 
-σ = st.sidebar.number_input(label="σ", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            iP = st.number_input(label="IP", step=0.001, format="%0.3f")
+            
 
-deltaΝ = st.sidebar.number_input(label="ΔΝ", step=0.001, format="%0.3f")
-st.sidebar.write("")
+            eA = st.number_input(label="EA", step=0.001, format="%0.3f")
+           
 
-data = {
-  'Con (M)': ConM,   
-  'T (K)': TempKelvin,      
-  'TE (eV)': TEeV,    
-  'EHOMO (eV)': EHOMOeV, 
-  'ELUMO (eV)': ELUMOeV,
-  'ΔΕ (eV)': deltaΕeV,
-  'µ': µ,           
-  'IP': iP,        
-  'EA': eA,         
-  'Χ': X,          
-  'η': η,         
-  'σ': σ,          
-  'ΔΝ': deltaΝ
-}
+            X = st.number_input(label="X", step=0.001, format="%0.3f")
 
-preview_df = pd.DataFrame(data, index=['input'])
+            η = st.number_input(label="η", step=0.001, format="%0.3f")
+            
 
-st.header("User Input as DataFrame")
-st.write("")
-st.dataframe(preview_df.iloc[:, :6])
-st.write("")
-st.dataframe(preview_df.iloc[:, 6:])
-st.write("")
+            σ = st.number_input(label="σ", step=0.001, format="%0.3f")
+            
 
+            deltaΝ = st.number_input(label="ΔΝ", step=0.001, format="%0.3f")
+            
+        submit_button = st.form_submit_button("Submit", type="primary")
+    # Tampilkan hasil input jika form disubmit
+    data = {
+      'Con (M)': ConM,   
+      'T (K)': TempKelvin,      
+      'TE (eV)': TEeV,    
+      'EHOMO (eV)': EHOMOeV, 
+      'ELUMO (eV)': ELUMOeV,
+      'ΔΕ (eV)': deltaΕeV,
+      'µ': µ,           
+      'IP': iP,        
+      'EA': eA,         
+      'Χ': X,          
+      'η': η,         
+      'σ': σ,          
+      'ΔΝ': deltaΝ
+    }
 
-predict_btn = st.button("**Predict**", type="primary")
-prediction = 0
-st.write("")
-if predict_btn:
-  inputs = [[ConM, TempKelvin, TEeV, EHOMOeV, ELUMOeV, deltaΕeV, µ, iP, eA, X, η, σ, deltaΝ]]
-  prediction = gbr.predict(inputs)[0]
+    prediction = 0
+    if submit_button:
+      inputs = [[ConM, TempKelvin, TEeV, EHOMOeV, ELUMOeV, deltaΕeV, µ, iP, eA, X, η, σ, deltaΝ]]
+      prediction = gbr.predict(inputs)[0]
 
-  bar = st.progress(0)
-  status_text = st.empty()
+      bar = st.progress(0)
+      status_text = st.empty()
 
-  for i in range(1, 101):
-    status_text.text(f"{i}% complete")
-    bar.progress(i)
-    time.sleep(0.01)
-    if i == 100:
-      time.sleep(1)
-      status_text.empty()
-      bar.empty()
+      for i in range(1, 101):
+        status_text.text(f"{i}% complete")
+        bar.progress(i)
+        time.sleep(0.01)
+        if i == 100:
+          time.sleep(1)
+          status_text.empty()
+          bar.empty()
 
-st.write("")
-st.write("")
-st.subheader("Prediction:")
-st.subheader(f"{prediction} %")
+    st.write("")
+    st.write("")
+    st.subheader("Prediction:")
+    st.subheader(f"{prediction} %")
 
-
+    
 
